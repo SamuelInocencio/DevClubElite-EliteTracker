@@ -32,6 +32,10 @@
     // Não gera os .js se houver erro de tipo no código.
     "noEmitOnError": true,
 
+    // Permite "import pkg from '../package.json'". Sem isto o TypeScript
+    // recusa importar arquivos .json e o build quebra (erro TS2732).
+    "resolveJsonModule": true,
+
     // Pula a checagem de tipos de dentro do node_modules: compila bem mais rápido.
     "skipLibCheck": true
   },

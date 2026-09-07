@@ -1,0 +1,26 @@
+/* Estilo mínimo do placeholder, já nas cores do Figma:
+   fundo escuro #0A1929 e destaque azul #1E6FFF. */
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: #0a1929;
+  color: #e6edf5;
+  font-family: system-ui, sans-serif;
+  text-align: center;
+}
+
+.app h1 {
+  color: #1e6fff;
+  margin: 0;
+}
+
+.app .api code {
+  background-color: rgba(30, 111, 255, 0.15);
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+}

@@ -1,0 +1,41 @@
+{
+  "compilerOptions": {
+    // Qual versão de JavaScript o TS vai gerar. ES2022 é seguro pro Node 24.
+    "target": "ES2022",
+    "lib": ["ES2022"],
+
+    // Sistema de módulos. "node16" faz o TS resolver os imports do mesmo jeito
+    // que o Node moderno resolve. Como o package.json NÃO tem "type": "module",
+    // o Node trata nossos arquivos como CommonJS (o require() de sempre) — e é
+    // por isso que os imports funcionam sem escrever ".js" no fim do caminho.
+    "module": "node16",
+
+    // De onde ler o código-fonte e onde jogar o JS compilado.
+    "rootDir": "./src",
+    "outDir": "./dist",
+
+    // Permite "import express from 'express'" em vez da forma antiga e feia
+    // "import * as express from 'express'".
+    "esModuleInterop": true,
+
+    // O modo rigoroso. É ele que obriga você a tratar valores que podem ser
+    // undefined/null. Chato no começo, salva você depois. Deixe ligado.
+    "strict": true,
+
+    // Avisa quando um switch/case "vaza" pro caso seguinte sem break.
+    "noFallthroughCasesInSwitch": true,
+
+    // Obriga arquivos a terem sempre o mesmo case no import (Linux é
+    // sensível a maiúsculas, Windows não — isso evita quebrar no deploy).
+    "forceConsistentCasingInFileNames": true,
+
+    // Não gera os .js se houver erro de tipo no código.
+    "noEmitOnError": true,
+
+    // Pula a checagem de tipos de dentro do node_modules: compila bem mais rápido.
+    "skipLibCheck": true
+  },
+
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

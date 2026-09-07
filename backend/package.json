@@ -1,0 +1,34 @@
+{
+  "name": "elitetracker-api",
+  "version": "0.0.0",
+  "description": "API para Elite Tracker",
+  "main": "src/server.ts",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
+  "keywords": [
+    "api",
+    "express",
+    "typescript",
+    "elite-tracker"
+  ],
+  "author": {
+    "name": "Samuel Inocencio",
+    "url": "https://github.com/SamuelInocencio"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.4.1",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2"
+  }
+}

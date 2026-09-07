@@ -1,0 +1,26 @@
+# Um .gitignore só, na raiz, valendo para backend/ e frontend/.
+# (As regras sem "/" na frente valem em qualquer subpasta do repositório.)
+
+# Dependências — com workspaces quase tudo fica no node_modules da raiz,
+# mas o frontend mantém uma cópia local do que não pôde ser hoisted.
+node_modules/
+
+# Segredos — NUNCA versionar. Os .env.example é que vão pro git.
+.env
+.env.local
+*.local
+
+# Build: TypeScript gera dist/, o Vite também (e dist-ssr/ no modo SSR)
+dist/
+dist-ssr/
+build/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Sistema operacional / editor
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/settings.json

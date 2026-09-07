@@ -1,0 +1,27 @@
+{
+  "name": "devclub-elite",
+  "version": "0.0.0",
+  "description": "Elite Tracker — monorepo (backend + frontend). Este package.json contém APENAS ferramentas do repositório inteiro. Dependência de aplicação vai em backend/ ou frontend/.",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev:back": "npm run dev --workspace backend",
+    "dev:front": "npm run dev --workspace frontend",
+    "build:back": "npm run build --workspace backend",
+    "build:front": "npm run build --workspace frontend",
+    "format": "biome format --write .",
+    "lint": "biome lint .",
+    "check": "biome check --write ."
+  },
+  "author": {
+    "name": "Samuel Inocencio",
+    "url": "https://github.com/SamuelInocencio"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "@biomejs/biome": "2.5.12"
+  }
+}

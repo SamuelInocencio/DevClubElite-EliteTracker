@@ -1,0 +1,20 @@
+/* Reset mínimo, global. Estilo de componente fica no CSS de cada componente
+   (App.css, e os que vierem) — é a regra de "CSS por componente" do projeto.
+
+   O index.css original do Vite foi removido: ele trazia o tema roxo da marca
+   Vite, um #root de largura fixa 1126px com borda, e tamanhos de fonte
+   grandes — tudo isso brigaria com o design escuro do nosso Figma. */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background-color: #0a1929;
+}
+
+#root {
+  min-height: 100vh;
+}

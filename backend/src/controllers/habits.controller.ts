@@ -1,17 +1,17 @@
 import type { Request, Response } from 'express';
 
-export class HabitsController {
-  // A aula usa any[]. Trocado por { name: string }[] porque é exatamente o que
-  // o store guarda — e "any" desliga a checagem de tipos justo onde o dado vem
-  // de fora. Isto some quando o Mongoose entrar e os hábitos forem pro banco.
-  private readonly habits: { name: string }[] = [];
+import { habitModel } from '../models/habit.model';
 
-  store = (request: Request, response: Response): Response => {
+export class HabitsController {
+  // Repara: 'store' é uma arrow function guardada numa propriedade,
+  // não um método normal. Isso é de propósito e importa.
+  store = async (request: Request, response: Response): Promise<Response> => {
     const { name } = request.body;
 
-    const newHabit = { name };
-
-    this.habits.push(newHabit);
+    // Sem passar o array de datas: o Mongoose ja inicializa campos de array
+    // como [] sozinho. Passar explicitamente seria redundante — e o nome teria
+    // que ser isCompleted, que e como o campo se chama no model.
+    const newHabit = await habitModel.create({ name });
 
     return response.status(201).json(newHabit);
   };

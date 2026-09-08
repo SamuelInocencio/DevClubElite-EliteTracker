@@ -1,18 +1,76 @@
-import type { Request, Response } from 'express';
+import { type Request, type Response } from 'express';
+import { z } from 'zod';
 
 import { habitModel } from '../models/habit.model';
+import { buildValidationErrorMessage } from '../utils/build-validation-error-message.util';
 
 export class HabitsController {
   // Repara: 'store' é uma arrow function guardada numa propriedade,
-  // não um método normal. Isso é de propósito e importa.
+  // não um método normal. Isso é de propósito e importa: na rota o método é
+  // PASSADO por referência (habitsController.store), e aí um método normal
+  // perderia o 'this'. Arrow function captura o 'this' da instância.
   store = async (request: Request, response: Response): Promise<Response> => {
-    const { name } = request.body;
+    const schema = z.object({ name: z.string() });
 
-    // Sem passar o array de datas: o Mongoose ja inicializa campos de array
-    // como [] sozinho. Passar explicitamente seria redundante — e o nome teria
-    // que ser isCompleted, que e como o campo se chama no model.
-    const newHabit = await habitModel.create({ name });
+    // Passa o body inteiro para o schema: é ele quem decide o que é válido,
+    // em vez de a gente escolher os campos na mão antes de validar.
+    // safeParse não lança exceção — devolve { success, data | error } —,
+    // por isso dá para tratar o erro com if, sem try/catch.
+    const habit = schema.safeParse(request.body);
+
+    if (!habit.success) {
+      const errors = buildValidationErrorMessage(habit.error.issues);
+
+      return response.status(422).json({ message: errors });
+    }
+
+    // Daqui para baixo usa-se habit.data.name, não o body cru: é o valor que
+    // passou pelo schema, e o TypeScript já sabe que é string.
+    const findHabit = await habitModel.findOne({ name: habit.data.name });
+
+    // RN: nome de hábito é único. Checa antes de criar para devolver 400
+    // em vez de deixar o banco guardar duplicado.
+    if (findHabit) {
+      return response.status(400).json({ message: 'Habit already exists.' });
+    }
+
+    const newHabit = await habitModel.create({
+      name: habit.data.name,
+      completedDates: [],
+    });
 
     return response.status(201).json(newHabit);
   };
+
+  // Lista todos os hábitos. Sem filtro por enquanto — quando entrar a
+  // autenticação, esta query passa a filtrar por userId vindo do TOKEN.
+  index = async (_request: Request, response: Response): Promise<Response> => {
+    // sort({ name: 1 }) → ordem crescente por nome (o -1 seria decrescente).
+    const habits = await habitModel.find().sort({ name: 1 });
+
+    return response.status(200).json(habits);
+  };
+
+
+  // Exclui um hábito pelo id que vem na URL (/habits/:id).
+  remove = async (request: Request, response: Response): Promise<Response> => {
+    // Aqui o schema valida request.params, não o body: o dado suspeito
+    // desta rota é o :id da URL.
+    const schema = z.object({ id: z.string() });
+
+    const habit = schema.safeParse(request.params);
+
+    if (!habit.success) {
+      const errors = buildValidationErrorMessage(habit.error.issues);
+
+      return response.status(422).json({ message: errors });
+    }
+
+    await habitModel.deleteOne({ _id: habit.data.id });
+
+    // 204 = "deu certo, e não tenho corpo de resposta para te devolver".
+    // Por isso é .send() e não .json(): 204 não pode ter corpo.
+    return response.status(204).send();
+  };
+
 }

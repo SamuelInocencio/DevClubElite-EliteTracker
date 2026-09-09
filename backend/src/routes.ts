@@ -15,6 +15,7 @@ routes.get('/', (_request, response) => {
 routes.get('/habits', habitsController.index);
 routes.post('/habits', habitsController.store);
 routes.delete('/habits/:id', habitsController.remove);
+routes.patch('/habits/:id/toggle', habitsController.toggle);
 
 /**
  * M (Model) → Responsável por se comunicar com o banco;

@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import type { Request, Response } from 'express';
 import { z } from 'zod';
 
@@ -84,4 +85,78 @@ export class HabitsController {
     return response.status(204).send();
   };
 
+  // Marca/desmarca o hábito como concluído no dia (PATCH /habits/:id/toggle).
+  // PARCIAL: por enquanto só valida, confirma que o hábito existe e devolve a
+  // data de hoje. A alternância em si (comparar com completedDates e gravar)
+  // ainda não foi feita.
+  toggle = async (request: Request, response: Response) => {
+    const schema = z.object({
+      id: z.string(),
+    });
+
+    const validated = schema.safeParse(request.params);
+
+    if (!validated.success) {
+      const errors = buildValidationErrorMessage(validated.error.issues);
+      return response.status(422).json({ message: errors });
+    }
+
+    const findHabit = await habitModel.findOne({
+      _id: validated.data.id,
+    });
+
+    if (!findHabit) {
+      return response.status(404).json({ message: 'Habit not found.' });
+    }
+
+    // startOf('day') zera hora/minuto/segundo: sobra só a data, que é a
+    // unidade que interessa para "concluí este hábito hoje".
+    // toISOString() padroniza o formato dos dois lados da comparação abaixo.
+    const now = dayjs().startOf('day').toISOString();
+
+    // Procura o dia de hoje dentro das datas já marcadas. Cada item vem do
+    // banco como Date, então passa pelo dayjs para virar a mesma string.
+    const isHabitCompletedOnDate = findHabit
+      .toObject()
+      ?.completedDates.find(
+        (item) => dayjs(String(item)).toISOString() === now,
+      );
+
+    // Já estava marcado hoje → desmarca ($pull remove o valor do array).
+    if (isHabitCompletedOnDate) {
+      const habitUpdated = await habitModel.findOneAndUpdate(
+        {
+          _id: validated.data.id,
+        },
+        {
+          $pull: {
+            completedDates: now,
+          },
+        },
+        {
+          // Sem isto o Mongoose devolveria o documento ANTES do update.
+          returnDocument: 'after',
+        },
+      );
+
+      return response.status(200).json(habitUpdated);
+    }
+
+    // Não estava marcado → marca ($push adiciona a data ao array).
+    const habitUpdated = await habitModel.findOneAndUpdate(
+      {
+        _id: validated.data.id,
+      },
+      {
+        $push: {
+          completedDates: now,
+        },
+      },
+      {
+        returnDocument: 'after',
+      },
+    );
+
+    return response.status(200).json(habitUpdated);
+  };
 }

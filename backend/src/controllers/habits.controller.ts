@@ -1,4 +1,4 @@
-import { type Request, type Response } from 'express';
+import type { Request, Response } from 'express';
 import { z } from 'zod';
 
 import { habitModel } from '../models/habit.model';
@@ -51,12 +51,14 @@ export class HabitsController {
     return response.status(200).json(habits);
   };
 
-
   // Exclui um hábito pelo id que vem na URL (/habits/:id).
   remove = async (request: Request, response: Response): Promise<Response> => {
     // Aqui o schema valida request.params, não o body: o dado suspeito
     // desta rota é o :id da URL.
-    const schema = z.object({ id: z.string() });
+    // O regex exige o formato de ObjectId do Mongo (24 dígitos hexadecimais).
+    // Sem ele, um id malformado ('abc') faria o Mongoose lançar CastError na
+    // query abaixo e a resposta viraria 500 em vez do 404 que queremos.
+    const schema = z.object({ id: z.string().regex(/^[0-9a-f]{24}$/i) });
 
     const habit = schema.safeParse(request.params);
 
@@ -64,6 +66,15 @@ export class HabitsController {
       const errors = buildValidationErrorMessage(habit.error.issues);
 
       return response.status(422).json({ message: errors });
+    }
+
+    // Confirma que o hábito existe antes de tentar apagar. Sem isso,
+    // deleteOne num id inexistente não reclama e a rota devolveria 204,
+    // dizendo que apagou algo que nunca existiu.
+    const findHabit = await habitModel.findOne({ _id: habit.data.id });
+
+    if (!findHabit) {
+      return response.status(404).json({ message: 'Habit not found.' });
     }
 
     await habitModel.deleteOne({ _id: habit.data.id });

@@ -1,4 +1,4 @@
-import { type ZodIssue } from 'zod';
+import type { ZodIssue } from 'zod';
 
 /**
  * Transforma a lista de problemas que o Zod devolve em mensagens legíveis.
